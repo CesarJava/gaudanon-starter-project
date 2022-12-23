@@ -1,7 +1,9 @@
+from gpiozero.pins.pigpio import PiGPIOFactory
 from gpiozero import LED
 from time import sleep
 
-white = LED(17)
+factory = PiGPIOFactory()
+white = LED(17, pin_factory=factory)
 
 while True:
     white.on()

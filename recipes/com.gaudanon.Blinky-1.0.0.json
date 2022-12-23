@@ -15,7 +15,7 @@
         "os": "linux"
       },
       "Lifecycle": {
-        "Install": "pip install gpiozero",
+        "Install": "pip3 install gpiozero",
         "Run": "python3 -u {artifacts:path}/blinky.py"
       },
       "Artifacts": [
