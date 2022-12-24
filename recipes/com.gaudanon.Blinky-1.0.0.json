@@ -4,9 +4,10 @@
   "ComponentVersion": "1.0.0",
   "ComponentDescription": "My Blinky Component",
   "ComponentPublisher": "Amazon",
-  "ComponentConfiguration": {
-    "DefaultConfiguration": {
-      "Message": "world"
+  "ComponentDependencies": {
+    "com.gaudanon.PiGPIO": {
+      "VersionRequirement": "1.0.1",
+      "DependencyType": "HARD"
     }
   },
   "Manifests": [
