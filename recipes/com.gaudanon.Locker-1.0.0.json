@@ -1,0 +1,37 @@
+{
+  "RecipeFormatVersion": "2020-01-25",
+  "ComponentName": "com.gaudanon.Locker",
+  "ComponentVersion": "1.0.0",
+  "ComponentDescription": "Locking mechanism for the door",
+  "ComponentPublisher": "Cesar Javaroni",
+  "ComponentConfiguration": {
+    "DefaultConfiguration": {
+      "ServoPort": 21,
+      "UnlockedPort": 19,
+      "LockedPort": 26,
+      "ActivatePort": 20
+    }
+  },
+  "ComponentDependencies": {
+    "com.gaudanon.PiGPIO": {
+      "VersionRequirement": "1.0.1",
+      "DependencyType": "HARD"
+    }
+  },
+  "Manifests": [
+    {
+      "Platform": {
+        "os": "linux"
+      },
+      "Lifecycle": {
+        "Install": "pip3 install gpiozero",
+        "Run": "python3 -u {artifacts:path}/locker.py {configuration:/ServoPort} {configuration:/LockedPort} {configuration:/UnlockedPort} {configuration:/ActivatePort} "
+      },
+      "Artifacts": [
+        {
+          "URI": "s3://gaudanon-bucket/artifacts/com.gaudanon.Locker/1.0.0/locker.py"
+        }
+      ]
+    }
+  ]
+}
