@@ -10,18 +10,38 @@
       "DependencyType": "HARD"
     }
   },
+  "ComponentConfiguration": {
+    "DefaultConfiguration": {
+      "accessControl": {
+        "aws.greengrass.ipc.pubsub": {
+          "com.gaudanon.Blinky:pub:1": {
+            "policyDescription": "Allows access to publish to status/Blinky.",
+            "operations": [
+              "aws.greengrass#PublishToTopic"
+            ],
+            "resources": [
+              "status/blinky"
+            ]
+          }
+        }
+      }
+    }
+  },
   "Manifests": [
     {
       "Platform": {
         "os": "linux"
       },
       "Lifecycle": {
-        "Install": "pip3 install gpiozero",
+        "Install": "pip3 install awsiotsdk gpiozero",
         "Run": "python3 -u {artifacts:path}/blinky.py"
       },
       "Artifacts": [
         {
           "URI": "s3://gaudanon-bucket/artifacts/com.gaudanon.Blinky/1.0.0/blinky.py"
+        },
+        {
+          "URI": "s3://gaudanon-bucket/artifacts/com.gaudanon.Blinky/1.0.0/IPCComm.py"
         }
       ]
     }
