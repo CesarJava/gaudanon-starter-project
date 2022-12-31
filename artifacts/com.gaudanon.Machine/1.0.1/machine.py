@@ -16,8 +16,11 @@ from IPCComm import IPCComm
 
 ipcClient = IPCComm("GaudanonMachine","*")
 
-def reportStatus(message):
-    statusMessage = "None"
+
+def handleBlinkyStatus(event):
+    message = ipcClient.returnEventMessage(event)
+    
+    statusMessage = "None"    
     try:
         jsonObj = json.loads(message)
         statusMessage = json.dumps(jsonObj)
@@ -26,6 +29,6 @@ def reportStatus(message):
         
     print("Status: ", statusMessage)
 
-ipcClient.subscribeCallbackMethod(reportStatus)
+#ipcClient.subscribeCallbackMethod(handleBlinkyStatus)
 
-ipcClient.subscribeToTopic("status/blinky")
+ipcClient.subscribeToTopic("status/blinky",handleBlinkyStatus)

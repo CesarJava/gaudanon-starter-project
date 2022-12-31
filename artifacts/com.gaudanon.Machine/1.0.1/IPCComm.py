@@ -66,22 +66,19 @@ class IPCComm:
         except Exception:
             traceback.print_exc()
                         
-        print("Message Published")
+        print("Message Published")   
     
-    def subscribeToTopic(self, topicToSubscribe=None):
-        topic = None
-        if topicToSubscribe :
-            topic = topicToSubscribe
-        elif self.topic :
-            topic = self.topic
-        else:
-            print("Please specify a topic")
-            return 
+    def subscribeToTopic(self, topicToSubscribe=None, streamEventCallback=None, streamErrorCallback=None, streamClosedCallback=None):
+        topic = self.__topicInterpreter(topicToSubscribe)
+        
+        onStreamEventCallback = streamEventCallback if streamEventCallback != None else self.__on_stream_event
+        onStreamErrorCallback = streamErrorCallback if streamErrorCallback != None else self.__on_stream_error
+        onStreamClosedCallback = streamClosedCallback if streamClosedCallback != None else self.__on_stream_closed
         
         try:
             # Subscription operations return a tuple with the response and the operation.
-            response, operation = self.ipc_client.subscribe_to_topic(topic=topic, on_stream_event=self.__on_stream_event,
-                                                        on_stream_error=self.__on_stream_error, on_stream_closed=self.__on_stream_closed)
+            response, operation = self.ipcClient.subscribe_to_topic(topic=topic, on_stream_event=onStreamEventCallback,
+                                                        on_stream_error=onStreamErrorCallback, on_stream_closed=onStreamClosedCallback)
             try:
                 while True:
                     time.sleep(10)
@@ -99,7 +96,19 @@ class IPCComm:
         
         print('Successfully subscribed to topic: ' + topic)
 
-    
+    def __topicInterpreter(self, topicInput=None):
+        topic = None
+        
+        if topicInput :
+            topic = topicInput
+        elif self.topic :
+            topic = self.topic
+        else:
+            print("Please specify a topic")
+            return 
+        
+        return topic
+        
     
     def __on_stream_event(self, event: SubscriptionResponseMessage) -> None:
         try:
@@ -122,6 +131,20 @@ class IPCComm:
     def __buildPubMessage(self,message):
         binaryMessage = BinaryMessage(message=bytes(message, 'utf-8'))
         return PublishMessage(binary_message=binaryMessage)
+    
+    @staticmethod
+    def returnEventMessage(event: SubscriptionResponseMessage) -> None:
+        try:
+            message = str(event.binary_message.message, 'utf-8')
+            return message
+        except:
+            traceback.print_exc()
+    
+    @staticmethod
+    def streamEventMessage(self, error: Exception) -> bool:
+        print('Received a stream error.')
+        traceback.print_exc()
+        return False  # Return True to close stream, False to keep stream open.
 
 
 
