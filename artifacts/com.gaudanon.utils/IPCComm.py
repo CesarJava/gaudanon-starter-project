@@ -90,7 +90,7 @@ class IPCComm:
         
         try:
             # Subscription operations return a tuple with the response and the operation.
-            response, operation = self.ipc_client.subscribe_to_topic(topic=topic, on_stream_event=self.__on_stream_event,
+            response, operation = self.ipcClient.subscribe_to_topic(topic=topic, on_stream_event=self.__on_stream_event,
                                                         on_stream_error=self.__on_stream_error, on_stream_closed=self.__on_stream_closed)
             try:
                 while True:
