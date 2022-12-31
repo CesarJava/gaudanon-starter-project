@@ -1,0 +1,43 @@
+{
+  "RecipeFormatVersion": "2020-01-25",
+  "ComponentName": "com.gaudanon.QrReader",
+  "ComponentVersion": "1.0.0",
+  "ComponentDescription": "My QrReader Component",
+  "ComponentPublisher": "Amazon",
+  "ComponentConfiguration": {
+    "DefaultConfiguration": {
+      "accessControl": {
+        "aws.greengrass.ipc.pubsub": {
+          "com.gaudanon.Blinky:pub:1": {
+            "policyDescription": "Allows access to publish to data/QrCode/Cam1.",
+            "operations": [
+              "aws.greengrass#PublishToTopic"
+            ],
+            "resources": [
+              "data/QrCode/Cam1"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "Manifests": [
+    {
+      "Platform": {
+        "os": "linux"
+      },
+      "Lifecycle": {
+        "Install": "pip3 install awsiotsdk opencv-contrib-python==4.6.0.66 pyzbar numpy",
+        "Run": "python3 -u {artifacts:path}/QrCodeReader.py"
+      },
+      "Artifacts": [
+        {
+          "URI": "s3://gaudanon-bucket/artifacts/com.gaudanon.Qr/1.0.0/QrCodeReader.py"
+        },
+        {
+          "URI": "s3://gaudanon-bucket/artifacts/com.gaudanon.Qr/1.0.0/IPCComm.py"
+        }
+      ]
+    }
+  ]
+}

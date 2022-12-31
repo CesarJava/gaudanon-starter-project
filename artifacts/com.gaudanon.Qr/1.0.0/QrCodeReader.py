@@ -2,11 +2,15 @@ import cv2
 from pyzbar.pyzbar import decode
 import numpy as np
 import awsiot.greengrasscoreipc
-
+from time import sleep
+from IPCComm import IPCComm
+import json
 
 camera_id = 0
 delay = 0.2
 window_name = "Detecting with Open CV"
+
+ipcClient = IPCComm("QrCodeCamera","data/QrCode/Cam1")
 
 # set up camera object
 cap = cv2.VideoCapture(camera_id)
@@ -19,7 +23,6 @@ def decodeImages(rawImage):
     for decodedImage in decode(image):
         codesRead.append(decodedImage)
     return codesRead
-
 
 def pointsTo32bitArray(pointsArray):
     points = [[point.x, point.y] for point in pointsArray]
@@ -47,11 +50,19 @@ def processQrCodes(codes):
     elif (len(codes) == 1):
         firstCodeImage = codes[0]
         codeData = getDataFromImage(firstCodeImage)
-        # TO-DO next Auth
+        reportCodeRead(codeData)
     else:
         print("waiting for code")
 
+def reportCodeRead(codeData):
+    messageBody = {
+        "message": codeData
+    }
+    publishMessageIpc(messageBody)
 
+def publishMessageIpc(message):
+    ipcClient.setMessage(json.dumps(message))
+    ipcClient.publishMessage()
 
 while True:
     # get the image
@@ -61,15 +72,14 @@ while True:
     if isImageCaptured:
         codesRead = decodeImages(image)
         processQrCodes(codesRead)
-        drawInWindow(image, codesRead)
-
+    #    drawInWindow(image, codesRead)
         
-        cv2.imshow(window_name, image)
+    #    cv2.imshow(window_name, image)
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    #if cv2.waitKey(1) & 0xFF == ord('q'):
+    #    break
 
 cap.release()
-cv2.destroyWindow(window_name)
+#cv2.destroyWindow(window_name)
 
 
