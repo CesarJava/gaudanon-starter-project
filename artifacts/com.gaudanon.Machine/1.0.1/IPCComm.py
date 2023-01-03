@@ -52,8 +52,11 @@ class IPCComm:
     def getMessage(self):
         return self.messageToPublish.json_message.message
 
-    def publishMessage(self, message=None):
+    def publishMessage(self, message=None, topicToPublish=None):
         messageToPublish = None
+        
+        topic = self.__topicInterpreter(topicToPublish)
+        
         if message:
             messageToPublish = self.__buildPubMessage(message)
         elif self.messageToPublish :
@@ -62,7 +65,7 @@ class IPCComm:
             raise Exception("No message specified")
         
         try:
-            self.ipcClient.publish_to_topic(topic=self.topic, publish_message=messageToPublish)
+            self.ipcClient.publish_to_topic(topic=topic, publish_message=messageToPublish)
         except Exception:
             traceback.print_exc()
                         
@@ -79,21 +82,23 @@ class IPCComm:
             # Subscription operations return a tuple with the response and the operation.
             response, operation = self.ipcClient.subscribe_to_topic(topic=topic, on_stream_event=onStreamEventCallback,
                                                         on_stream_error=onStreamErrorCallback, on_stream_closed=onStreamClosedCallback)
-            try:
-                while True:
-                    time.sleep(10)
-            except InterruptedError:
-                print('Subscribe interrupted.')
+            #try:
+            #    while True:
+            #        time.sleep(10)
+            #except InterruptedError:
+            #    print('Subscribe interrupted.')
 
-            # To stop subscribing, close the stream.
-            operation.close()
+            ## To stop subscribing, close the stream.
+            #operation.close()
         except UnauthorizedError:
             print('Unauthorized error while subscribing to topic: ' + topic)
             traceback.print_exc()
+            operation.close()
         except Exception:
             print('Exception occurred')
             traceback.print_exc()
-        
+            operation.close()
+            
         print('Successfully subscribed to topic: ' + topic)
 
     def __topicInterpreter(self, topicInput=None):
@@ -146,7 +151,7 @@ class IPCComm:
         traceback.print_exc()
         return False  # Return True to close stream, False to keep stream open.
 
-
+        
 
     
     

@@ -3,4 +3,9 @@
 sudo /greengrass/v2/bin/greengrass-cli deployment create \
 --recipeDir ~/Documents/gaudanon-starter-project/recipes \
 --artifactDir ~/Documents/gaudanon-starter-project/artifacts \
---merge "com.gaudanon.Machine=1.0.1"
+--remove "com.gaudanon.QrCodeReader"
+
+sudo /greengrass/v2/bin/greengrass-cli deployment create \
+--recipeDir ~/Documents/gaudanon-starter-project/recipes \
+--artifactDir ~/Documents/gaudanon-starter-project/artifacts \
+--merge "com.gaudanon.QrCodeReader=1.0.0"

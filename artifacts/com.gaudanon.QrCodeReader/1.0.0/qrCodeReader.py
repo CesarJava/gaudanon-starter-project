@@ -72,6 +72,7 @@ while True:
     if isImageCaptured:
         codesRead = decodeImages(image)
         processQrCodes(codesRead)
+        sleep(5)
     #    drawInWindow(image, codesRead)
         
     #    cv2.imshow(window_name, image)
