@@ -43,12 +43,19 @@ def printQrCodeInfo(qrCodeObj):
 def grantOperatorAccess():
     print("Access: Operator Level granted")
     messageBody = {
-        "lockerState": "open"
+        "lockerAction": "open"
     }
-    ipcClient.publishMessage(json.dumps(messageBody),"cmd/locker/operator")
+    ipcClient.publishMessage(json.dumps(messageBody),"cmd/locker1/operator")
 
-def lockerControl(acess_level):
-        if(acess_level == 1):
+def grantMaintenaceAccess():
+    print("Access: Maintenance Level granted")
+    messageBody = {
+        "lockerAction": "close"
+    }
+    ipcClient.publishMessage(json.dumps(messageBody),"cmd/locker1/operator")
+
+def lockerControl(access_level):
+        if(access_level == 1):
             grantOperatorAccess()
         elif(access_level == 2):
             grantMaintenaceAccess()

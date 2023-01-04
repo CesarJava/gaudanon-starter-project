@@ -2,6 +2,11 @@ from gpiozero import Button, AngularServo
 from time import sleep
 from signal import pause
 import sys
+from IPCComm import IPCComm
+import json
+
+ipcClient = IPCComm("Locker1","cmd/locker1/operator")
+
 #
 # Arg Settings
 #
@@ -15,6 +20,7 @@ unlockedPort = sys.argv[3] if len(sys.argv) >= 4 else 19
 lockedPort = sys.argv[2] if len(sys.argv) >= 3 else 26
 
 activatePort = sys.argv[4] if len(sys.argv) >= 5 else 20
+
 
 #
 # GPIO Vars
@@ -79,6 +85,41 @@ def setup():
 
 setup()
 
+def decodeJsonMessage(message):
+    strMessage = "None"
+    jsonObj = None    
+    try:
+        jsonObj = json.loads(message)
+        strMessage = json.dumps(jsonObj)
+    except Exception:
+        strMessage = message
+    
+    return strMessage, jsonObj
+
+def handleLockerAction(actionEvent):
+    print("New Action Received")
+    action = actionEvent["lockerAction"]
+    
+    if(action == "open"):
+        unlock()
+    elif(action ==  "close"):
+        lock()
+    else:
+        lock()
+    
+
+def handlerLockCommand(event):
+    print("Event:")
+    print(event)
+    eventPayload = json.loads(ipcClient.returnEventMessage(event))
+    
+    #eventMessageStr , eventJsonObj = decodeJsonMessage(eventPayload)
+    print("Event Payload:")
+    print(eventPayload)
+    
+    handleLockerAction(eventPayload)
+
+ipcClient.subscribeToTopic("cmd/locker1/operator", handlerLockCommand)
        
 while True:
     print("Servo: %s Door State: %s Locked: %s Unlocked: %s Activate: %s"%(servo.angle,lockingState,locked.is_pressed, unlocked.is_pressed, activate.is_pressed))
