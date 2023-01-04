@@ -12,14 +12,14 @@
       "ActivatePort": 20,
       "accessControl": {
         "aws.greengrass.ipc.pubsub": {
-          "com.gaudanon.Locker1:pubsub:1": {
+          "com.gaudanon.Locker1:pubsub:2": {
             "policyDescription": "Allows access to publish and subscribe to locker1 topics.",
             "operations": [
-              "aws.greengrass#PublishToTopic",
-              "aws.greengrass#SubscribeToTopic"
+              "aws.greengrass#SubscribeToTopic",
+              "aws.greengrass#PublishToTopic"
             ],
             "resources": [
-              "cmd/locker1/operator",
+              "cmd/locker1",
               "status/locker1"
             ]
           }

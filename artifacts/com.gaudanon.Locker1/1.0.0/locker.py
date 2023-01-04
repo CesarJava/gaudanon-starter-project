@@ -5,7 +5,7 @@ import sys
 from IPCComm import IPCComm
 import json
 
-ipcClient = IPCComm("Locker1","cmd/locker1/operator")
+ipcClient = IPCComm("Locker1","cmd/locker1")
 
 #
 # Arg Settings
@@ -34,6 +34,8 @@ activate = Button(activatePort)
 
 lockingState = "DOOR LOCKED" if locked.is_pressed else "DOOR UNLOCKED"
 
+currentUser = "NoUser"
+previousUser = "NoUser"
 #
 #
 #
@@ -43,6 +45,8 @@ def setLockingState(state):
     validStates = ["LOCKED","UNLOCKED","LOCKING", "UNLOCKING"]
     if(state in validStates):
         lockingState = state
+    
+    reportLockState()
 
 def itShouldBeLocking():
     return lockingState == "LOCKING"
@@ -96,10 +100,10 @@ def decodeJsonMessage(message):
     
     return strMessage, jsonObj
 
-def handleLockerAction(actionEvent):
+def handleLockerAction(eventPayload):
     print("New Action Received")
-    action = actionEvent["lockerAction"]
-    
+    action = eventPayload["lockerAction"]
+        
     if(action == "open"):
         unlock()
     elif(action ==  "close"):
@@ -107,7 +111,19 @@ def handleLockerAction(actionEvent):
     else:
         lock()
     
-
+def handleUserExchange(eventPayload):
+    global currentUser, previousUser
+    currentUserReceived = None
+    try:
+        currentUserReceived= str(eventPayload["currentUserName"])
+        print("Handling user exchange for: "+currentUserReceived)
+    except Exception:
+        print("Invalid user name. Must be String.")
+        return
+    
+    previousUser = currentUser
+    currentUser  = currentUserReceived   
+        
 def handlerLockCommand(event):
     print("Event:")
     print(event)
@@ -118,12 +134,29 @@ def handlerLockCommand(event):
     print(eventPayload)
     
     handleLockerAction(eventPayload)
+    handleUserExchange(eventPayload)
 
-ipcClient.subscribeToTopic("cmd/locker1/operator", handlerLockCommand)
+ipcClient.subscribeToTopic("cmd/locker1", handlerLockCommand)
+
+def publishMessageIpc(message):
+    ipcClient.setMessage(message)
+    ipcClient.publishMessage(topicToPublish="status/locker1")
+
+def reportLockState():
+    global lockingState, currentUser, previousUser
+    lockStateBody = {
+        "id": 1,
+        "name": "OperatorLocker",
+        "currentState": lockingState,
+        "operatorName": currentUser,
+        "previousUserName": previousUser
+    }
+    publishMessageIpc(lockStateBody)
        
 while True:
     print("Servo: %s Door State: %s Locked: %s Unlocked: %s Activate: %s"%(servo.angle,lockingState,locked.is_pressed, unlocked.is_pressed, activate.is_pressed))
-    sleep(1)
+    reportLockState()
+    sleep(10)
     
     
     

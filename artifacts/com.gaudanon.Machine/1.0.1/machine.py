@@ -40,25 +40,29 @@ def printQrCodeInfo(qrCodeObj):
           "\tUser Name: ", qrCodeObj["name"],
           "\tUser Id: ", qrCodeObj["id"])
 
-def grantOperatorAccess():
+def grantOperatorAccess(userName=None):
     print("Access: Operator Level granted")
     messageBody = {
-        "lockerAction": "open"
+        "lockerAction": "open",
+        "currentUserName": userName
     }
-    ipcClient.publishMessage(json.dumps(messageBody),"cmd/locker1/operator")
+    ipcClient.publishMessage(json.dumps(messageBody),"cmd/locker1")
 
-def grantMaintenaceAccess():
+def grantMaintenaceAccess(userName=None):
     print("Access: Maintenance Level granted")
     messageBody = {
-        "lockerAction": "close"
+        "lockerAction": "close",
+        "currentUserName": userName
     }
-    ipcClient.publishMessage(json.dumps(messageBody),"cmd/locker1/operator")
+    ipcClient.publishMessage(json.dumps(messageBody),"cmd/locker1")
 
-def lockerControl(access_level):
+def lockerControl(authObj=None):
+        access_level = authObj["acess_level"]
+        currentUsername = authObj["name"]
         if(access_level == 1):
-            grantOperatorAccess()
+            grantOperatorAccess(currentUsername)
         elif(access_level == 2):
-            grantMaintenaceAccess()
+            grantMaintenaceAccess(currentUsername)
         else:
             lockEverything()
             
@@ -70,10 +74,9 @@ def newUserEvent(qrCodeData):
     else:
         return False
 
-def qrCodeAuth(authObj):
-      
+def qrCodeAuth(authObj):      
     printQrCodeInfo(authObj)
-    lockerControl(authObj["acess_level"])
+    lockerControl(authObj)
 
 def handleBlinkyStatus(event):
     message = ipcClient.returnEventMessage(event)
