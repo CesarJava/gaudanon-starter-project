@@ -39,6 +39,7 @@ def printQrCodeInfo(qrCodeObj):
     print("User Requesting access: \n",
           "\tUser Name: ", qrCodeObj["name"],
           "\tUser Id: ", qrCodeObj["id"])
+    
 
 def grantOperatorAccess(userName=None):
     print("Access: Operator Level granted")
@@ -47,14 +48,20 @@ def grantOperatorAccess(userName=None):
         "currentUserName": userName
     }
     ipcClient.publishMessage(json.dumps(messageBody),"cmd/locker1")
+    
+    messageBody["lockerAction"] = "close"
+    
+    ipcClient.publishMessage(json.dumps(messageBody),"cmd/locker2")
 
 def grantMaintenaceAccess(userName=None):
-    print("Access: Maintenance Level granted")
+    print("Access: Maintenace Level granted")
     messageBody = {
-        "lockerAction": "close",
+        "lockerAction": "open",
         "currentUserName": userName
     }
     ipcClient.publishMessage(json.dumps(messageBody),"cmd/locker1")
+    
+    ipcClient.publishMessage(json.dumps(messageBody),"cmd/locker2")
 
 def lockerControl(authObj=None):
         access_level = authObj["acess_level"]
