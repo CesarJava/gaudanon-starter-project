@@ -36,10 +36,7 @@ lockingState = "DOOR LOCKED" if locked.is_pressed else "DOOR UNLOCKED"
 
 currentUser = "NoUser"
 previousUser = "NoUser"
-
-#
-#
-#
+currentRole = "NoUser"
 
 def setLockingState(state):
     global lockingState
@@ -113,16 +110,20 @@ def handleLockerAction(eventPayload):
         lock()
     
 def handleUserExchange(eventPayload):
-    global currentUser, previousUser
+    global currentUser, previousUser, currentRole
     currentUserReceived = None
+    currentUserRole=None
     try:
         currentUserReceived= str(eventPayload["currentUserName"])
+        currentUserRole = str(eventPayload["currentUserRole"])
+        print("Handling user exchange for: "+currentUserReceived)
     except Exception:
         print("Invalid user name. Must be String.")
         return
     
     previousUser = currentUser
     currentUser  = currentUserReceived   
+    currentRole = currentUserRole
         
 def handlerLockCommand(event):
     print("Event:")
@@ -143,12 +144,13 @@ def publishMessageIpc(message):
     ipcClient.publishMessage(topicToPublish="status/locker2")
 
 def reportLockState():
-    global lockingState, currentUser, previousUser
+    global lockingState, currentUser, previousUser, currentRole
     lockStateBody = {
         "id": 2,
         "name": "MaintenaceLocker",
         "currentState": lockingState,
         "operatorName": currentUser,
+        "currentRole": currentRole,
         "previousUserName": previousUser
     }
     publishMessageIpc(lockStateBody)
