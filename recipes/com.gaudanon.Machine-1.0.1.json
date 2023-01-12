@@ -17,6 +17,21 @@
               "*"
             ]
           }
+        },
+        "aws.greengrass.ipc.mqttproxy": {
+          "com.gaudanon.Machine:mqttproxy:1": {
+            "policyDescription": "Allows access to publish/subscribe for status and alarm topics using Ipc to MQTT proxy",
+            "operations": [
+              "aws.greengrass#PublishToIoTCore",
+              "aws.greengrass#SubscribeToIoTCore"
+            ],
+            "resources": [
+              "data/gaudanon/status/machine/locker1",
+              "data/gaudanon/status/machine/locker2",
+              "data/gaudanon/status/machine/qrcode",
+              "cmd/gaudanon/alarm"
+            ]
+          }
         }
       }
     }

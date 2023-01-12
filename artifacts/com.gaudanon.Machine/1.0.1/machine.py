@@ -8,7 +8,10 @@ from awsiot.greengrasscoreipc.model import (
     PublishMessage,
     JsonMessage,
     SubscriptionResponseMessage,
-    UnauthorizedError
+    UnauthorizedError,
+    PublishToIoTCoreRequest,
+    QOS
+    
 )
 import sys
 import traceback
@@ -41,11 +44,12 @@ def printQrCodeInfo(qrCodeObj):
           "\tUser Id: ", qrCodeObj["id"])
     
 
-def grantOperatorAccess(userName=None):
+def grantOperatorAccess(userName=None,userRole=None):
     print("Access: Operator Level granted")
     messageBody = {
         "lockerAction": "open",
-        "currentUserName": userName
+        "currentUserName": userName,
+        "currentUserRole": userRole
     }
     ipcClient.publishMessage(json.dumps(messageBody),"cmd/locker1")
     
@@ -53,11 +57,12 @@ def grantOperatorAccess(userName=None):
     
     ipcClient.publishMessage(json.dumps(messageBody),"cmd/locker2")
 
-def grantMaintenaceAccess(userName=None):
+def grantMaintenaceAccess(userName=None,userRole=None):
     print("Access: Maintenace Level granted")
     messageBody = {
         "lockerAction": "open",
-        "currentUserName": userName
+        "currentUserName": userName,
+        "currentUserRole": userRole
     }
     ipcClient.publishMessage(json.dumps(messageBody),"cmd/locker1")
     
@@ -66,10 +71,11 @@ def grantMaintenaceAccess(userName=None):
 def lockerControl(authObj=None):
         access_level = authObj["acess_level"]
         currentUsername = authObj["name"]
+        currentUserRole = authObj["role"]
         if(access_level == 1):
-            grantOperatorAccess(currentUsername)
+            grantOperatorAccess(currentUsername, currentUserRole)
         elif(access_level == 2):
-            grantMaintenaceAccess(currentUsername)
+            grantMaintenaceAccess(currentUsername, currentUserRole)
         else:
             lockEverything()
             
@@ -107,11 +113,16 @@ def handleBlinkyStatus(event):
 
 def getQrDataFromPayload(eventPayload):
     eventPayloadStr , eventJsonObj = decodeJsonMessage(eventPayload)
-    bodyStr, bodyJsonObject = decodeJsonMessage(eventJsonObj["body"]) 
-    qrPayloadStr, qrJsonObj = decodeJsonMessage(bodyJsonObject["message"])
+   
+    qrPayloadStr, qrJsonObj = decodeJsonMessage(eventJsonObj["body"])
     #print("Final qr Data:")
     #print(qrJsonObj)
     return qrJsonObj
+
+def publishQrCodeToCloud(eventPayload):
+    topic = "data/gaudanon/status/machine/qrcode"
+    ipcClient.publishToIoTCore(topic, '1', eventPayload)
+
 
 def handleQrCode(event):
     eventPayload = ipcClient.returnEventMessage(event)    
@@ -122,6 +133,17 @@ def handleQrCode(event):
         qrCodeAuth(qrCodeData)
     else:
         print("User Already Authenticated")
+        
+    publishQrCodeToCloud(eventPayload)
+
+def handleLockerStatus(event):
+    eventPayload = ipcClient.returnEventMessage(event) 
+    print("Locker Status: ", eventPayload)
+    if (json.loads(eventPayload)["clientId"] == "Locker1"):
+        topic = "data/gaudanon/status/machine/locker1"
+    elif (json.loads(eventPayload)["clientId"] == "Locker2"):
+        topic = "data/gaudanon/status/machine/locker2"
+    ipcClient.publishToIoTCore(topic, '1', eventPayload)
 
 #ipcClient.subscribeCallbackMethod(handleBlinkyStatus)
 
@@ -129,9 +151,14 @@ ipcClient.subscribeToTopic("status/blinky",handleBlinkyStatus)
 
 ipcClient.subscribeToTopic("data/QrCode/Cam1",handleQrCode) 
 
+ipcClient.subscribeToTopic("status/locker1",handleLockerStatus)
+
+ipcClient.subscribeToTopic("status/locker2",handleLockerStatus) 
+
+
 try:
     while True:
         sleep(1)
-        print("Listening to topics.")
+        print("Listening...")
 except InterruptedError:
     print('Subscribe interrupted.')
