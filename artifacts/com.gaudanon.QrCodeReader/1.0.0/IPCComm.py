@@ -137,6 +137,9 @@ class IPCComm:
         binaryMessage = BinaryMessage(message=bytes(message, 'utf-8'))
         return PublishMessage(binary_message=binaryMessage)
     
+    def publishToIoTCore(self, topicName, qos, payload):
+        self.ipcClient.publish_to_iot_core(topic_name=topicName, qos='1',payload=json.dumps(payload))
+    
     @staticmethod
     def returnEventMessage(event: SubscriptionResponseMessage) -> None:
         try:

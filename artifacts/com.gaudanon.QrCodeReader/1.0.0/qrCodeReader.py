@@ -55,13 +55,10 @@ def processQrCodes(codes):
         print("waiting for code")
 
 def reportCodeRead(codeData):
-    messageBody = {
-        "message": codeData
-    }
-    publishMessageIpc(messageBody)
+    publishMessageIpc(codeData)
 
 def publishMessageIpc(message):
-    ipcClient.setMessage(json.dumps(message))
+    ipcClient.setMessage(message)
     ipcClient.publishMessage()
 
 while True:
